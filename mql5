@@ -1,0 +1,62 @@
+
+//+------------------------------------------------------------------+
+//|                                                   RSI versus SMA |
+//|                   https://www.forexroboteasy.com                  |
+//|                                           Forex Robot Easy Team |
+//+------------------------------------------------------------------+
+
+#property indicator_chart_window
+#property indicator_buffers 2
+#property indicator_plots   2
+
+// Define indicator buffers
+double RSI_Buffer[];
+double SMA_Buffer[];
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Set indicator buffers
+   SetIndexBuffer(0, RSI_Buffer);
+   SetIndexBuffer(1, SMA_Buffer);
+
+   // Create indicator plots
+   PlotIndexSetDouble(0, PLOT_EMPTY_VALUE, EMPTY_VALUE);
+   PlotIndexSetDouble(1, PLOT_EMPTY_VALUE, EMPTY_VALUE);
+
+   // Set indicator labels
+   PlotIndexSetString(0, PLOT_LABEL, 'RSI');
+   PlotIndexSetString(1, PLOT_LABEL, 'SMA');
+
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime& time[],
+                const double& open[],
+                const double& high[],
+                const double& low[],
+                const double& close[],
+                const long& tick_volume[],
+                const long& volume[],
+                const int& spread[])
+{
+   // Calculate RSI
+   ArraySetAsSeries(close, true);
+   int rsi_calculated = iRSI(Symbol(), PERIOD_CURRENT, 14, PRICE_CLOSE, prev_calculated);
+   ArrayCopy(RSI_Buffer, close, 0, prev_calculated, rates_total);
+
+   // Calculate SMA
+   ArraySetAsSeries(close, false);
+   int sma_calculated = iMA(Symbol(), PERIOD_CURRENT, 20, 0, MODE_SMA, PRICE_CLOSE, prev_calculated);
+   ArrayCopy(SMA_Buffer, close, 0, prev_calculated, rates_total);
+
+   // Return calculated bars
+   return(rates_total);
+}
